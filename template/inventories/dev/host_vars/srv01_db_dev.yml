@@ -1,0 +1,5 @@
+ansible_host: 10.0.1.15
+ansible_port: 22
+ansible_user: ansible_db
+ansible_ssh_private_key_file: ~/.ssh/id_rsa_ansible_db.pem
+#app_instance_id: srv01_db_prod

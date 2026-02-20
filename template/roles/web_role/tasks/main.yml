@@ -1,0 +1,12 @@
+---
+- name: setup host debian
+  ansible.builtin.apt:
+    name: apache2
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: setup host redhat
+  ansible.builtin.dnf:
+    name: httpd
+    state: present
+  when: ansible_os_family == "RedHat"

@@ -1,0 +1,4 @@
+# variable metier (pas des variables ansible)
+nginx_port: 80
+app_env: production
+app_webroot: /var/www/app

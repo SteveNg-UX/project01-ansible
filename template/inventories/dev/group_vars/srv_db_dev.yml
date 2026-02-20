@@ -1,0 +1,4 @@
+# variable metier (pas des variables ansible)
+db_port: 5432
+db_user: appuser
+db_name: appdb
