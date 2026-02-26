@@ -1,24 +1,26 @@
 ---
-- name: update redhat
+- name: update nodes
   hosts: all
-  ansible.builtin.apt:
-    name: "*"
-    state: latest
-  when: ansible_os_family == "Debian"
+  tasks:
+    - name: update debian
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+      when: ansible_os_family == "Debian"
 
-- name: update debian
-  hosts: all
-  ansible.builtin.rpm:
-    name: "*"
-    state: latest
-  when: ansible_os_family == "RedHat"
+    - name: update redhat
+      ansible.builtin.yum:
+        name: "*"
+        state: latest
+      when: ansible_os_family == "RedHat"
 
-- name: deploy web service
+- name: deploy web service node
   hosts: [srv_web_prod, srv_web_dev]
   roles:
     - web_role
 
-- name: deploy database service
+
+- name: deploy db service node
   hosts: [srv_db_prod, srv_db_dev]
   roles:
     - db_role
