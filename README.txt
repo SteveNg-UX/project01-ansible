@@ -19,9 +19,9 @@
 +------------------------------------------------------------------------------------+
 
 
-+---------+
-| context |
-+---------+---------+---------------+---------------+---------------+-----------+
++----------+
+| srv pool |
++----------+--------+---------------+---------------+---------------+-----------+
 | host              | ipv4          | server groups | environment   | site      |
 +-------------------+---------------+---------------+---------------+-----------+
 | srv01_orchestrator| 10.0.1.10 /24 | srv_db_prod   | production    | paris     |
@@ -51,6 +51,7 @@
 +-------+-----------------------------------+-----------------------------------------------+
 | step  | description                       | command                                       |
 +-------+-----------------------------------+-----------------------------------------------+
+| 1     | install ansible                   | apt install ansible -y                        |
 | 1     | check inventory                   | ansible-inventory -i inventories --graph      |
 | 2     | check synthax playbook            | ansible-playbook playbook.yml -i inventories  |
 | 3     | check hosts communications        | ansible all -m ping -u ansible                |
