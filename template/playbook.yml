@@ -1,6 +1,7 @@
 ---
 - name: update nodes
   hosts: all
+  become: true
   tasks:
     - name: update debian
       ansible.builtin.apt:
@@ -16,11 +17,13 @@
 
 - name: deploy web service node
   hosts: [srv_web_prod, srv_web_dev]
+  become: true
   roles:
     - web_role
 
 
 - name: deploy db service node
   hosts: [srv_db_prod, srv_db_dev]
+  become: true
   roles:
     - db_role
