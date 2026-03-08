@@ -1,0 +1,12 @@
+---
+- name: deploy stack docker lead
+  hosts: docker_lead
+  become: true
+  roles:
+    - docker-lead
+
+- name: deploy stack docker slave
+  hosts: docker_slave
+  become: true
+  roles:
+    - docker-slave

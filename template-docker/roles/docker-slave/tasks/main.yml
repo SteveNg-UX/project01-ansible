@@ -1,0 +1,45 @@
+---
+- name: install curl "Debian"
+  ansible.builtin.apt:
+    name: curl
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: add update repository "Debian"
+  ansible.builtin.apt:
+    upgrade: full
+  when: ansible_os_family == "Debian"
+
+- name: install docker
+  ansible.builtin.command: curl -fsSL https://get.docker.com -o install-docker.sh && sh install-docker.sh --dry-run && sh install-docker.sh
+
+- name: restart service docker
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+
+- name: Add ansible user to docker group
+  ansible.builtin.user:
+    name: "{{ usernode }}"
+    groups: docker
+    append: yes
+
+- name: Reset ssh connection to apply new group membership
+  ansible.builtin.meta: reset_connection
+
+- name: Fetch token from master
+  ansible.builtin.fetch:
+    src: "/home/{{ usernode }}/tocken2slave.sh"
+    dest: "/tmp/tocken2slave.sh"
+    flat: true
+  delegate_to: "{{ ipnodelead }}"
+  run_once: true
+
+- name: Copy token to slave
+  ansible.builtin.copy:
+    src: "/tmp/tocken2slave.sh"
+    dest: "/home/{{ usernode }}/tocken2slave.sh"
+    mode: '0755'
+
+- name: join cluster docker
+  ansible.builtin.command: sh ~/tocken2slave.sh

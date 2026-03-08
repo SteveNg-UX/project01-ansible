@@ -1,0 +1,39 @@
+---
+- name: install ca-certificates "Debian"
+  ansible.builtin.apt:
+    name: ca-certificates
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: install curl "Debian"
+  ansible.builtin.apt:
+    name: ca-certificates
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: add update repository "Debian"
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+- name: install docker
+  ansible.builtin.command: curl -fsSL https://get.docker.com -o install-docker.sh && sh install-docker.sh --dry-run && sh install-docker.sh
+
+- name: restart docker
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+
+- name: Add ansible user to docker group
+  ansible.builtin.user:
+    name: "{{ usernode }}"
+    groups: docker
+    append: yes
+
+- name: Reset ssh connection to apply new group membership
+  ansible.builtin.meta: reset_connection
+
+- name: initialisation cluster docker swarm and promote node lead
+  ansible.builtin.command: docker swarm init --advertise-addr $(hostname -i) | grep "join" > tocken2slave.sh

@@ -1,0 +1,8 @@
+ansible_port: 22
+ansible_user: {{ usernode }}
+ansible_ssh_private_key_file: ./.ssh/id_user0.pem
+become_users: true
+
+usernode: ansible
+ipnodelead: 192.168.1.232
+file_ssh_nodelead: ./.ssh/id_user0_docker_lead01.pem
