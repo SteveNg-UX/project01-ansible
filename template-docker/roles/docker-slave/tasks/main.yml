@@ -1,45 +1,127 @@
 ---
-- name: install curl "Debian"
-  ansible.builtin.apt:
-    name: curl
-    state: present
-  when: ansible_os_family == "Debian"
+- name: Update
+  tasks:
+    - name: upgrade apt packages debian
+      ansible.builtin.apt:
+        upgrade: full
+      when: ansible_os_family == "Debian"
 
-- name: add update repository "Debian"
-  ansible.builtin.apt:
-    upgrade: full
-  when: ansible_os_family == "Debian"
+    - name: Upgrade packages redhat
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+      when: ansible_os_family == "RedHat"
 
-- name: install docker
-  ansible.builtin.command: curl -fsSL https://get.docker.com -o install-docker.sh && sh install-docker.sh --dry-run && sh install-docker.sh
 
-- name: restart service docker
-  ansible.builtin.service:
-    name: docker
-    state: restarted
 
-- name: Add ansible user to docker group
-  ansible.builtin.user:
-    name: "{{ usernode }}"
-    groups: docker
-    append: yes
+- name: Install docker dependencie
+  tasks:
+    - name: Install docker dependencies debian
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg-agent
+        - software-properties-common
+      when: ansible_os_family == "Debian"
 
-- name: Reset ssh connection to apply new group membership
-  ansible.builtin.meta: reset_connection
+    - name: Install docker dependencies redhat
+      ansible.builtin.dnf:
+        name: "{{ iten }}"
+        state: present
+      loop:
+        - dnf-plugins-core
+        - device-mapper-persistent-data
+        - lvm2
+      when: ansible_os_family == "RedHat"
 
-- name: Fetch token from master
-  ansible.builtin.fetch:
-    src: "/home/{{ usernode }}/tocken2slave.sh"
-    dest: "/tmp/tocken2slave.sh"
-    flat: true
-  delegate_to: "{{ ipnodelead }}"
-  run_once: true
 
-- name: Copy token to slave
-  ansible.builtin.copy:
-    src: "/tmp/tocken2slave.sh"
-    dest: "/home/{{ usernode }}/tocken2slave.sh"
-    mode: '0755'
 
-- name: join cluster docker
-  ansible.builtin.command: sh ~/tocken2slave.sh
+- name: Add docker repository
+  tasks:
+    - name: Add Docker's official GPG key debian
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Add Docker repository debian
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') $(lsb_release -cs) stable"
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Update apt debian
+      ansible.builtin.apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Add docker repository redhat
+      ansible.builtin.dnf_repository:
+        name: docker
+        baseurl: https://download.docker.com/linux/rhel/docker-ce.repo
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://download.docker.com/linux/rhel/gpg
+      when: ansible_os_family == "RedHat"
+
+
+
+- name: Install docker engine
+  tasks:
+    - name: Install docker engine debian
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+      when: ansible_os_family == "Debian"
+ 
+    - name: Install docker engine redhat
+      ansible.builtin.dnf:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+      when: ansible_os_family == "RedHat"
+
+
+
+- name: Configure docker
+  tasks:
+    - name: Start and enable docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add user to docker group
+      ansible.builtin.user:
+        name: {{ ansible_user }}
+        groups: docker
+        append: yes
+
+    - name: Reset ssh connection to apply new docker group membership
+      ansible.builtin.meta: reset_connection
+
+
+
+- name: Configure cluster docker swarm
+  tasks:    
+    - name: Copy token from orchestrator to node
+      ansible.builtin.copy:
+        src: "/tmp/worker_join_cmd.sh"
+        dest: "/tmp/worker_join_cmd.sh"
+        mode: '0755'
+    
+    - name: Join node to cluster docker swarm as worker
+      ansible.builtin.command: bash /tmp/worker_join_cmd.sh
