@@ -1,4 +1,4 @@
 ansible_host: {{ ipnodelead }}
 #ansible_port: 22
-#ansible_user: {{ usernode }}
-ansible_ssh_private_key_file: {{ file_ssh_nodelead }}
+#ansible_user: ansible_nodeleader01
+ansible_ssh_private_key_file: ./.ssh/id_ansible_nodeleader01.pem

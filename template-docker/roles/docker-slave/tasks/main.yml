@@ -30,7 +30,7 @@
 
     - name: Install docker dependencies redhat
       ansible.builtin.dnf:
-        name: "{{ iten }}"
+        name: "{{ item }}"
         state: present
       loop:
         - dnf-plugins-core

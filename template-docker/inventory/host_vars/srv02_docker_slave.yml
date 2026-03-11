@@ -1,4 +1,4 @@
 ansible_host: 192.168.1.234
 #ansible_port: 22
-#ansible_user: {{ usernode }}
-ansible_ssh_private_key_file: ./.ssh/id_user0_docker_slavz02.pem
+#ansible_user: ansible_nodeslave02
+ansible_ssh_private_key_file: ./.ssh/id_ansible_nodeslave02.pem
